@@ -1,21 +1,40 @@
-import { IsNotEmpty, IsUrl } from "class-validator";
+import { ApiProperty } from "@nestjs/swagger";
+import { IsNotEmpty, IsOptional, IsUrl } from "class-validator";
 
 export class CreatePostDto {
-    @IsNotEmpty() title: string;
-    @IsNotEmpty() content: string;
-    @IsNotEmpty() @IsUrl() image: string;
+    @ApiProperty({ example: 'Sample Title' })
+    @IsNotEmpty()
+    title: string;
+
+    @ApiProperty({ example: 'Sample Content' })
+    @IsNotEmpty()
+    content: string;
+
+    @ApiProperty({ example: 'https://example.com/image.jpg' })
+    @IsNotEmpty()
+    @IsUrl()
+    image: string;
     user: any;
 }
 
 export class UpdatePostDto {
     id: string;
-    @IsNotEmpty() title: string;
-    @IsNotEmpty() content: string;
+
+    @ApiProperty({ example: 'Updated Title' })
+    @IsNotEmpty()
+    title: string;
+
+    @ApiProperty({ example: 'Updated Content' })
+    @IsNotEmpty()
+    content: string;
 }
 
+
 export class PaginationPostDto {
-    @IsNotEmpty()
+    @ApiProperty({ required: false })
+    @IsOptional()
     page: number;
-    @IsNotEmpty()
+    @ApiProperty({ required: false })
+    @IsOptional()
     limit: number;
 }
