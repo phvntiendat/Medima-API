@@ -8,6 +8,7 @@ import { CommentModule } from './comment/comment.module';
 import { GroupModule } from './group/group.module';
 import { EventModule } from './event/event.module';
 import { ChatModule } from './chat/chat.module';
+import { LikeModule } from './like/like.module';
 
 @Module({
   imports: [
@@ -17,7 +18,8 @@ import { ChatModule } from './chat/chat.module';
     CommentModule,
     GroupModule,
     EventModule,
-    ChatModule
+    ChatModule,
+    LikeModule
   ],
   controllers: [AppController],
   providers: [AppService],

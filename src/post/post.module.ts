@@ -13,8 +13,6 @@ import { PostRepository } from "./post.repository";
                 schema: PostSchema
             }
         ]),
-
-
     ],
 
     controllers: [PostController],

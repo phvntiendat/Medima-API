@@ -16,11 +16,24 @@ const CommentSchema = new Schema(
     }
 )
 
+CommentSchema.virtual("replies", {
+    ref: "Comment",
+    foreignField: "parent",
+    localField: "_id",
+    justOne: false
+});
+
+CommentSchema.virtual("likes", {
+    ref: "CommentLike",
+    foreignField: "comment",
+    localField: "_id",
+    justOne: false
+});
 
 export { CommentSchema };
 export interface Comment extends Document {
     content: string;
     user: User;
     post: Post;
-    replies: Comment
+    parent: Comment
 }

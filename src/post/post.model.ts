@@ -25,6 +25,13 @@ PostSchema.virtual("comments", {
     justOne: false
 });
 
+PostSchema.virtual("likes", {
+    ref: "Like",
+    foreignField: "post",
+    localField: "_id",
+    justOne: false
+});
+
 
 export { PostSchema };
 export interface Post extends Document {

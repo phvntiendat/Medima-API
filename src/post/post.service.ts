@@ -29,25 +29,24 @@ export class PostService {
     async getPostById(id: string) {
         const post = await this.postRepository.findById(id);
         if (!post) throw new HttpException('No post with this id', HttpStatus.NOT_FOUND);
-        await post.populate(
+        const returnPost = await post.populate(
             [
                 { path: 'user', select: 'first_name last_name avatar' },
-                {
-                    path: 'comments',
-                    populate: {
-                        path: 'user',
-                        select: 'first_name last_name avatar'
-                    },
-                    options: {
-                        sort: {
-                            createdAt: -1
-                        }
-                    }
-
-                }
+                { path: 'likes' },
+                { path: 'comments'}
             ]
         )
-        return post.toObject()
+        const postObj = returnPost.toObject()
+        const likes = postObj.likes.length
+        const comments = postObj.comments.length
+
+        delete postObj.likes
+        delete postObj.comments
+        return {
+            ...postObj,
+            likes,
+            comments
+        }
     }
 
     async createPost(user: User, postDto: CreatePostDto) {

@@ -35,76 +35,109 @@ export class CommentService {
         var mongoose = require('mongoose');
         const count = await this.commentRepository.countDocuments({post: new mongoose.Types.ObjectId(id), parent: null})
         const countPage = Math.ceil(count / limit)
-        const skip = (page - 1) * limit || 0
-        const comments = await this.commentRepository.aggregate([
+        // const skip = (page - 1) * limit || 0
+        // const comments = await this.commentRepository.aggregate([
+        //     {
+        //         $match: {
+        //             post: new mongoose.Types.ObjectId(id),
+        //             parent: null
+        //         }
+        //     },
+        //     {
+        //         $lookup: {
+        //             from: 'comments',
+        //             localField: '_id',
+        //             foreignField: 'parent',
+        //             as: 'replies'
+        //         }
+        //     }, 
+        //     {
+        //         $unwind: '$replies'
+        //     },
+        //     {
+        //         $lookup: {
+        //             from: 'users',
+        //             localField: 'user',
+        //             foreignField: '_id',
+        //             as: 'user'
+        //         }
+        //     }, 
+        //     {
+        //         $unwind: '$user'
+        //     },
+        //     {
+        //         $sort: {
+        //             'createdAt': 1
+        //         }
+        //     },
+        //     {
+        //         $skip: skip
+        //     },
+        //     {
+        //         $limit: Number(limit)
+        //     },
+        //     {
+        //         $group: {
+        //             _id: '$_id',
+        //             content: { $first: '$content' },
+        //             user: {
+        //                 $first: {
+        //                     _id: '$user._id',
+        //                     first_name: '$user.first_name',
+        //                     last_name: '$user.last_name',
+        //                     email: '$user.email',
+        //                     avatar: '$user.avatar'
+        //                 }
+        //             },
+        //             createdAt: { $first: '$createdAt' },
+        //             updatedAt: { $first: '$updatedAt' },
+        //             replies: { $sum: 1 }
+        //         }
+        //     },
+        //     {
+        //         $project: {
+        //             _id: 1,
+        //             content: 1,
+        //             replies: 1,
+        //             user: 1,
+        //             createdAt: 1,
+        //             updatedAt: 1,
+        //         }
+        //     },
+        // ]);
+        const oldComments = await this.commentRepository.getByCondition(
             {
-                $match: {
-                    post: new mongoose.Types.ObjectId(id),
-                    parent: null
-                }
+                post: new mongoose.Types.ObjectId(id),
+                parent: null
             },
+            null,
             {
-                $lookup: {
-                    from: 'comments',
-                    localField: '_id',
-                    foreignField: 'parent',
-                    as: 'replies'
-                }
-            }, 
-            {
-                $unwind: '$replies'
+                sort: {
+                    _id: -1,
+                },
+                skip: (page - 1) * limit,
+                limit: limit
             },
-            {
-                $lookup: {
-                    from: 'users',
-                    localField: 'user',
-                    foreignField: '_id',
-                    as: 'user'
-                }
-            }, 
-            {
-                $unwind: '$user'
-            },
-            {
-                $sort: {
-                    'createdAt': 1
-                }
-            },
-            {
-                $skip: skip
-            },
-            {
-                $limit: Number(limit)
-            },
-            {
-                $group: {
-                    _id: '$_id',
-                    content: { $first: '$content' },
-                    user: {
-                        $first: {
-                            _id: '$user._id',
-                            first_name: '$user.first_name',
-                            last_name: '$user.last_name',
-                            email: '$user.email',
-                            avatar: '$user.avatar'
-                        }
-                    },
-                    createdAt: { $first: '$createdAt' },
-                    updatedAt: { $first: '$updatedAt' },
-                    replies: { $sum: 1 }
-                }
-            },
-            {
-                $project: {
-                    _id: 1,
-                    content: 1,
-                    replies: 1,
-                    user: 1,
-                    createdAt: 1,
-                    updatedAt: 1,
-                }
-            },
-        ]);
+            [
+                { path: 'replies'},
+                { path: 'likes'},
+                { path: 'user', select: 'first_name last_name email avatar'}
+            ]
+        )
+        const comments = oldComments.map(comment => {
+            const commentObject = comment.toObject();
+            const likes = commentObject.replies ? commentObject.replies.length : 0;
+            const replies = commentObject.likes ? commentObject.likes.length : 0;
+            delete commentObject.likes
+            delete commentObject.replies
+
+            return {
+                ...commentObject,
+                likes,
+                replies,
+            };
+        });
+        
         return {
             count,
             countPage,
@@ -203,5 +236,9 @@ export class CommentService {
 
     async deleteComment(user: User, id: string) {
         
+    }
+
+    async getCommentById(id: string) {
+        return await this.commentRepository.findById(id)
     }
 }
