@@ -8,8 +8,8 @@ export class BaseRepository<T extends Document> {
         return await createdEntity.save();
     }
 
-    async findById(id: string, option?: QueryOptions): Promise<T> {
-        return this.model.findById(id, option);
+    async findById(id: string, field?:any | null, option?: QueryOptions): Promise<T> {
+        return this.model.findById(id, field, option);
     }
 
     async findByCondition(filter) {
@@ -24,6 +24,10 @@ export class BaseRepository<T extends Document> {
     ): Promise<T[]> {
         return this.model.find(filter, field, option).populate(populate);
     }
+
+    async aggregate(option: any) {
+        return this.model.aggregate(option);
+      }
 
     async findAll(): Promise<T[]> {
         return this.model.find();

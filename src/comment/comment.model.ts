@@ -7,6 +7,7 @@ const CommentSchema = new Schema(
         content: String,
         user: { type: Schema.Types.ObjectId, ref: 'User' },
         post: { type: Schema.Types.ObjectId, ref: 'Post' },
+        parent: { type: Schema.Types.ObjectId, ref: 'Comment' }
     },
     {
         timestamps: true,
@@ -21,4 +22,5 @@ export interface Comment extends Document {
     content: string;
     user: User;
     post: Post;
+    replies: Comment
 }
