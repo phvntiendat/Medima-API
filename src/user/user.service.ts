@@ -1,7 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { CreateUserDto, LoginUserDto } from './dto/user.dto';
+import { CreateUserDto, LoginUserDto, UpdateUserDto } from './dto/user.dto';
 import { UserRepository } from './user.repository';
+import { User } from './user.model';
 
 @Injectable()
 export class UserService {
@@ -76,5 +77,34 @@ export class UserService {
         }
 
         return user;
+    }
+
+    async searchUser(keyword: string, page: number, limit: number = 10) {
+        let query = {
+            $or: [
+                { first_name: { $regex: keyword, $options: 'i' } }, 
+                { last_name: { $regex: keyword, $options: 'i' } }, 
+                { email: { $regex: keyword, $options: 'i' } },    
+            ],
+        }
+        if(!keyword) query = null
+        const count = await this.userRepository.countDocuments(query)
+        const countPage = Math.ceil(count / limit)
+        const users = await this.userRepository.getByCondition(
+            query,
+            ['first_name', 'last_name', 'email', 'avatar'],
+            {
+                sort: {
+                    _id: -1,
+                },
+                skip: (page - 1) * limit,
+                limit: limit
+            },
+        )
+        return { count, countPage, users }
+    }
+
+    async updateUser(user: User, userDto: UpdateUserDto) {
+        return await this.userRepository.findByIdAndUpdate(user.id, userDto);
     }
 }

@@ -9,6 +9,7 @@ import { GroupModule } from './group/group.module';
 import { EventModule } from './event/event.module';
 import { ChatModule } from './chat/chat.module';
 import { LikeModule } from './like/like.module';
+import { MediaModule } from './media/media.module';
 
 @Module({
   imports: [
@@ -19,7 +20,8 @@ import { LikeModule } from './like/like.module';
     GroupModule,
     EventModule,
     ChatModule,
-    LikeModule
+    LikeModule,
+    MediaModule
   ],
   controllers: [AppController],
   providers: [AppService],

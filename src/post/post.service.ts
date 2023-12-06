@@ -10,7 +10,7 @@ export class PostService {
     async getAllPosts(page: number, limit: number = 10) {
         const count = await this.postRepository.countDocuments({})
         const countPage = Math.ceil(count / limit)
-        const posts = await this.postRepository.getByCondition(
+        const prePosts = await this.postRepository.getByCondition(
             {},
             null,
             {
@@ -20,7 +20,25 @@ export class PostService {
                 skip: (page - 1) * limit,
                 limit: limit
             },
-            { path: 'user', select: 'first_name last_name avatar' });
+            [
+                { path: 'user', select: 'first_name last_name avatar' },
+                { path: 'likes' },
+                { path: 'comments'}
+            ]
+        );
+        const posts = prePosts.map(post => {
+            const postObject = post.toObject();
+            const comments = postObject.comments ? postObject.comments.length : 0;
+            const likes = postObject.likes ? postObject.likes.length : 0;
+            delete postObject.likes
+            delete postObject.comments
+
+            return {
+                ...postObject,
+                likes,
+                comments,
+            };
+        });
         return {
             count, countPage, posts
         }
@@ -90,7 +108,7 @@ export class PostService {
     async getAllPostsByUserId(id: string, page: number, limit: number = 10) {
         const count = await this.postRepository.countDocuments({ user: id })
         const countPage = Math.ceil(count / limit)
-        const posts = await this.postRepository.getByCondition(
+        const prePosts = await this.postRepository.getByCondition(
             {
                 user: id
             },
@@ -102,11 +120,26 @@ export class PostService {
                 skip: (page - 1) * limit,
                 limit: limit
             },
-            { path: 'user', select: 'first_name last_name avatar' });
+            [
+                { path: 'user', select: 'first_name last_name avatar' },
+                { path: 'likes' },
+                { path: 'comments'}
+            ]);
+        const posts = prePosts.map(post => {
+            const postObject = post.toObject();
+            const comments = postObject.comments ? postObject.comments.length : 0;
+            const likes = postObject.likes ? postObject.likes.length : 0;
+            delete postObject.likes
+            delete postObject.comments
+
+            return {
+                ...postObject,
+                likes,
+                comments,
+            };
+        });
         return {
-            count,
-            countPage,
-            posts
+            count, countPage, posts
         }
     }
 }

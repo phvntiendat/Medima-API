@@ -57,4 +57,29 @@ export class RefreshTokenDto {
     refresh_token: string
 }
 
+export class PaginationUserDto {
+    page: number;
+    limit: number;
+}
+
+export class UpdateUserDto {
+    @ApiProperty({ example: 'Dat' })
+    first_name: string;
+
+    @ApiProperty({ example: 'Phan' })
+    last_name: string;
+
+    @ApiProperty({ example: '1990-01-01' })
+    date_of_birth: Date;
+
+    @ApiProperty({ example: '1234567890' })
+    phone: string;
+
+    @ApiProperty({ example: true })
+    gender: boolean;
+
+    @ApiProperty({ example: 'url-to-avatar-image' })
+    avatar: string;
+}
+
 
