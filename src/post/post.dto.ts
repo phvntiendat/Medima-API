@@ -15,6 +15,9 @@ export class CreatePostDto {
     @IsUrl()
     image: string;
     user: any;
+
+    @ApiProperty({ example: '6550fe61463641b890392053' })
+    group: string;
 }
 
 export class UpdatePostDto {

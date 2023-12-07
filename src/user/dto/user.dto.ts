@@ -82,4 +82,10 @@ export class UpdateUserDto {
     avatar: string;
 }
 
+export class ForgotPasswordDto {
+    @ApiProperty({ example: 'email@example.com' })
+    @IsEmail()
+    @IsNotEmpty()
+    email: string;
+}
 

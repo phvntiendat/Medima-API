@@ -16,6 +16,7 @@ export class CreateReplyDto {
     @ApiProperty({ example: '655357da04357e1770124f16' })
     @IsNotEmpty()
     parent: string
+    post: string
 }
 
 export class UpdateCommentDto {

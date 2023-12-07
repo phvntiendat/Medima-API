@@ -1,4 +1,5 @@
 import { Schema, Document } from "mongoose";
+import { Group } from "src/group/group.model";
 import { User } from "src/user/user.model";
 
 const PostSchema = new Schema(
@@ -9,6 +10,10 @@ const PostSchema = new Schema(
         user: {
             type: Schema.Types.ObjectId,
             ref: 'User'
+        },
+        group: {
+            type: Schema.Types.ObjectId,
+            ref: 'Group'
         },
     },
     {
@@ -39,4 +44,5 @@ export interface Post extends Document {
     content: string;
     user: User;
     image: String;
+    group: Group
 }

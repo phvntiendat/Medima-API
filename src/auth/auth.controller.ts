@@ -1,7 +1,7 @@
 import { Body, Controller, HttpCode, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBadRequestResponse, ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
-import { CreateUserDto, LoginUserDto, RefreshTokenDto } from 'src/user/dto/user.dto';
+import { CreateUserDto, ForgotPasswordDto, LoginUserDto, RefreshTokenDto } from 'src/user/dto/user.dto';
 import { AuthService } from './auth.service';
 
 @ApiTags('auth')
@@ -40,6 +40,14 @@ export class AuthController {
     @Post('refresh')
     async refresh(@Body() refreshTokenDto: RefreshTokenDto ) {
         return await this.authService.refresh(refreshTokenDto.refresh_token);
+    }
+
+    @HttpCode(200)
+    @ApiOkResponse({ description: 'Email sent.' })
+    @ApiBadRequestResponse({ description: 'Email does not exist.' })
+    @Post('forgot-password')
+    async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+        return await this.authService.forgotPassword(forgotPasswordDto.email)
     }
 
 }

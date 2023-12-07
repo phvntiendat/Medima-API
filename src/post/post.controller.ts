@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBadRequestResponse, ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { CreatePostDto, PaginationPostDto, UpdatePostDto } from './post.dto';
 import { PostService } from './post.service';
 
@@ -18,16 +18,18 @@ export class PostController {
 
     @Get(':id')
     @HttpCode(200)
+    @ApiBearerAuth()
+    @UseGuards(AuthGuard("jwt"))
     @ApiOkResponse({ description: 'Post retrieved.' })
     @ApiNotFoundResponse({ description: 'No post with provided id.' })
-    getPostById(@Param('id') id: string) {
-        return this.postService.getPostById(id);
+    getPostById(@Req() req: any, @Param('id') id: string) {
+        return this.postService.getPostById(req.user, id);
     }
 
     @Post('create')
     @ApiBearerAuth()
     @HttpCode(201)
-    @ApiOkResponse({ description: 'Post created.' })
+    @ApiCreatedResponse({ description: 'Post created.' })
     @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
     @ApiBadRequestResponse({ description: 'Failed to create post.' })
     @UseGuards(AuthGuard('jwt'))

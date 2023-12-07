@@ -13,7 +13,7 @@ export class CommentService {
 
     async createComment(user: User, commentDto: CreateCommentDto) {
         // check if postId exist
-        const post = await this.postService.getPostById(commentDto.post)
+        const post = await this.postService.getPostById(user, commentDto.post)
         if (!post) throw new HttpException('Invalid Post Id', HttpStatus.BAD_REQUEST);
 
         // add commenter
@@ -24,87 +24,22 @@ export class CommentService {
     }
 
     async createReply(user: User, replyDto: CreateReplyDto) {
+        
         const parent = await this.commentRepository.findById(replyDto.parent)
         if(!parent) throw new HttpException('Invalid Parent Comment Id', HttpStatus.BAD_REQUEST);
         replyDto.user = user.id
+        replyDto.post = parent.post._id
+        
+        const post = await this.postService.getPostById(user, replyDto.post)
         const reply = await this.commentRepository.create(replyDto)
         return reply.populate({ path: 'user', select: 'first_name last_name avatar' })
     }
 
-    async getCommentByPostId(id: string, page:number, limit:number = 6) {
+    async getCommentByPostId(user: User, id: string, page:number, limit:number = 6) {
+        const post = await this.postService.getPostById(user, id)
         var mongoose = require('mongoose');
         const count = await this.commentRepository.countDocuments({post: new mongoose.Types.ObjectId(id), parent: null})
         const countPage = Math.ceil(count / limit)
-        // const skip = (page - 1) * limit || 0
-        // const comments = await this.commentRepository.aggregate([
-        //     {
-        //         $match: {
-        //             post: new mongoose.Types.ObjectId(id),
-        //             parent: null
-        //         }
-        //     },
-        //     {
-        //         $lookup: {
-        //             from: 'comments',
-        //             localField: '_id',
-        //             foreignField: 'parent',
-        //             as: 'replies'
-        //         }
-        //     }, 
-        //     {
-        //         $unwind: '$replies'
-        //     },
-        //     {
-        //         $lookup: {
-        //             from: 'users',
-        //             localField: 'user',
-        //             foreignField: '_id',
-        //             as: 'user'
-        //         }
-        //     }, 
-        //     {
-        //         $unwind: '$user'
-        //     },
-        //     {
-        //         $sort: {
-        //             'createdAt': 1
-        //         }
-        //     },
-        //     {
-        //         $skip: skip
-        //     },
-        //     {
-        //         $limit: Number(limit)
-        //     },
-        //     {
-        //         $group: {
-        //             _id: '$_id',
-        //             content: { $first: '$content' },
-        //             user: {
-        //                 $first: {
-        //                     _id: '$user._id',
-        //                     first_name: '$user.first_name',
-        //                     last_name: '$user.last_name',
-        //                     email: '$user.email',
-        //                     avatar: '$user.avatar'
-        //                 }
-        //             },
-        //             createdAt: { $first: '$createdAt' },
-        //             updatedAt: { $first: '$updatedAt' },
-        //             replies: { $sum: 1 }
-        //         }
-        //     },
-        //     {
-        //         $project: {
-        //             _id: 1,
-        //             content: 1,
-        //             replies: 1,
-        //             user: 1,
-        //             createdAt: 1,
-        //             updatedAt: 1,
-        //         }
-        //     },
-        // ]);
         const oldComments = await this.commentRepository.getByCondition(
             {
                 post: new mongoose.Types.ObjectId(id),
@@ -145,7 +80,9 @@ export class CommentService {
         }
     }
 
-    async getReplies(id: string, page:number, limit:number = 6) {
+    async getReplies(user: User, id: string, page:number, limit:number = 6) {
+        const parent = await this.commentRepository.findById(id)
+        const post = await this.postService.getPostById(user, parent.post._id)
         var mongoose = require('mongoose');
         const count = await this.commentRepository.countDocuments({parent: new mongoose.Types.ObjectId(id)})
         const countPage = Math.ceil(count / limit)
@@ -187,84 +124,6 @@ export class CommentService {
             countPage,
             replies
         }
-        // var mongoose = require('mongoose');
-        // const count = await this.commentRepository.countDocuments({parent: new mongoose.Types.ObjectId(id)})
-        // const countPage = Math.ceil(count / limit)
-        // const skip = (page - 1) * limit || 0
-        // const replies = await this.commentRepository.aggregate([
-        //     {
-        //         $match: {
-        //             parent: new mongoose.Types.ObjectId(id),
-        //         }
-        //     },
-        //     {
-        //         $lookup: {
-        //             from: 'comments',
-        //             localField: '_id',
-        //             foreignField: 'parent',
-        //             as: 'replies'
-        //         }
-        //     }, 
-        //     {
-        //         $unwind: '$replies'
-        //     },
-        //     {
-        //         $lookup: {
-        //             from: 'users',
-        //             localField: 'user',
-        //             foreignField: '_id',
-        //             as: 'user'
-        //         }
-        //     }, 
-        //     {
-        //         $unwind: '$user'
-        //     },
-        //     {
-        //         $sort: {
-        //             'createdAt': 1
-        //         }
-        //     },
-        //     {
-        //         $skip: skip
-        //     },
-        //     {
-        //         $limit: Number(limit)
-        //     },
-        //     {
-        //         $group: {
-        //             _id: '$_id',
-        //             content: { $first: '$content' },
-        //             user: {
-        //                 $first: {
-        //                     _id: '$user._id',
-        //                     first_name: '$user.first_name',
-        //                     last_name: '$user.last_name',
-        //                     email: '$user.email',
-        //                     avatar: '$user.avatar'
-        //                 }
-        //             },
-        //             createdAt: { $first: '$createdAt' },
-        //             updatedAt: { $first: '$updatedAt' },
-        //             replies: { $sum: 1 }
-        //         }
-        //     },
-        //     {
-        //         $project: {
-        //             _id: 1,
-        //             content: 1,
-        //             replies: 1,
-        //             createdAt: 1,
-        //             updatedAt: 1,
-        //             user: 1
-        //         }
-        //     },
-        // ]);
-        // return {
-        //     count,
-        //     countPage,
-        //     replies
-        // }
-
     }
 
     async updateComment(user: User, id: string, commentDto: UpdateCommentDto) {

@@ -18,7 +18,7 @@ export class LikeService {
     async createLike(user: User, likeDto: CreateLikeDto) {
         likeDto.user = user.id
         // if current user already likes the post, delete the like
-        const post = await this.postService.getPostById(likeDto.post)
+        const post = await this.postService.getPostById(user, likeDto.post)
         if(!post) throw new HttpException('No post with this id', HttpStatus.NOT_FOUND);
        
         const like = await this.likeRepository.findByCondition(

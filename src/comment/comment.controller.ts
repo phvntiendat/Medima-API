@@ -33,19 +33,23 @@ export class CommentController {
     }
 
     @HttpCode(200)
+    @ApiBearerAuth()
+    @UseGuards(AuthGuard("jwt"))
     @ApiOkResponse({ description: 'Comments retrieved.' })
     @ApiNotFoundResponse({ description: 'No post with provided id.' })
     @Get('by-post/:id') 
-    async getCommentByPostId(@Param('id') id: string, @Query() {page, limit}: PaginationCommentDto) {
-        return this.commentService.getCommentByPostId(id, page, limit)
+    async getCommentByPostId(@Req() req: any,@Param('id') id: string, @Query() {page, limit}: PaginationCommentDto) {
+        return this.commentService.getCommentByPostId( req.user, id, page, limit)
     }
 
     @HttpCode(200)
     @ApiOkResponse({ description: 'Replies retrieved.' })
     @ApiNotFoundResponse({ description: 'No parent comment with provided id.' })
     @Get('reply/:id') 
-    async getReplies(@Param('id') id: string, @Query() {page, limit}: PaginationCommentDto) {
-        return this.commentService.getReplies(id, page, limit)
+    @ApiBearerAuth()
+    @UseGuards(AuthGuard("jwt"))
+    async getReplies(@Req() req: any, @Param('id') id: string, @Query() {page, limit}: PaginationCommentDto) {
+        return this.commentService.getReplies(req.user, id, page, limit)
     }
 
     @ApiBearerAuth()

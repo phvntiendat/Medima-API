@@ -2,16 +2,22 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreatePostDto, UpdatePostDto } from './post.dto';
 import { User } from 'src/user/user.model';
 import { PostRepository } from './post.repository';
+import { GroupService } from 'src/group/group.service';
 
 @Injectable()
 export class PostService {
-    constructor(private readonly postRepository: PostRepository) { }
+    constructor(
+        private readonly postRepository: PostRepository,
+        private readonly groupService: GroupService
+    ) { }
 
     async getAllPosts(page: number, limit: number = 10) {
-        const count = await this.postRepository.countDocuments({})
+        const count = await this.postRepository.countDocuments({group: null})
         const countPage = Math.ceil(count / limit)
         const prePosts = await this.postRepository.getByCondition(
-            {},
+            {
+                group: null
+            },
             null,
             {
                 sort: {
@@ -44,9 +50,14 @@ export class PostService {
         }
     }
 
-    async getPostById(id: string) {
+    async getPostById(user: User, id: string) {
         const post = await this.postRepository.findById(id);
         if (!post) throw new HttpException('No post with this id', HttpStatus.NOT_FOUND);
+
+        if(post.group != null) {
+            await this.groupService.privacyCheck(user, post.group._id)
+        }
+
         const returnPost = await post.populate(
             [
                 { path: 'user', select: 'first_name last_name avatar' },
@@ -69,6 +80,10 @@ export class PostService {
 
     async createPost(user: User, postDto: CreatePostDto) {
         postDto.user = user.id;
+        if(postDto.group) {
+            const group = await this.groupService.getGroupById(postDto.group)
+            if(!group) throw new HttpException('Invalid group id', HttpStatus.BAD_REQUEST);
+        }
         const newPost = await this.postRepository.create(postDto)
         return newPost.populate({ path: 'user', select: 'first_name last_name avatar' })
     }
@@ -141,5 +156,9 @@ export class PostService {
         return {
             count, countPage, posts
         }
+    }
+
+    async privacyCheck(user: User, id: string) {
+        return await this.groupService.privacyCheck(user, id)
     }
 }

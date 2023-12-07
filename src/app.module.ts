@@ -10,6 +10,11 @@ import { EventModule } from './event/event.module';
 import { ChatModule } from './chat/chat.module';
 import { LikeModule } from './like/like.module';
 import { MediaModule } from './media/media.module';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { join } from 'path';
+import { RequestModule } from './request/request.module';
 
 @Module({
   imports: [
@@ -21,7 +26,32 @@ import { MediaModule } from './media/media.module';
     EventModule,
     ChatModule,
     LikeModule,
-    MediaModule
+    MediaModule,
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: async (config: ConfigService) => ({
+        transport: {
+          host: config.get('MAIL_HOST'),
+          secure: false,
+          auth: {
+            user: config.get('MAIL_USER'),
+            pass: config.get('MAIL_PASSWORD'),
+          },
+        },
+        defaults: {
+          from: `"Medima" <${config.get('MAIL_FROM')}>`,
+        },
+        template: {
+          dir: join(__dirname, 'src/templates/email'),
+          adapter: new HandlebarsAdapter(),
+          options: {
+            strict: true,
+          },
+        },
+      }),
+      inject: [ConfigService],
+    }),
+    RequestModule,
   ],
   controllers: [AppController],
   providers: [AppService],
