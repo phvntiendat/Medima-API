@@ -9,7 +9,7 @@ import { RequestService } from './request.service';
 export class RequestController {
     constructor(private readonly requestService: RequestService) { }
 
-    @Post('create')
+    @Post()
     @ApiBearerAuth()
     @HttpCode(201)
     @ApiCreatedResponse({ description: 'Request created.' })

@@ -53,7 +53,7 @@ export class CommentController {
     @ApiOkResponse({ description: 'Comment updated.' })
     @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
     @ApiBadRequestResponse({ description: 'Failed to update comment.' })
-    @Patch('update/:id')
+    @Patch(':id')
     async updateComment(@Req() req: any, @Param('id') id: string, @Body() comment: UpdateCommentDto) {
         return this.commentService.updateComment(req.user, id, comment)
     }
@@ -63,7 +63,7 @@ export class CommentController {
     @ApiOkResponse({ description: 'Comment deleted.' })
     @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
     @ApiBadRequestResponse({ description: 'Failed to delete comment.' })
-    @Delete('delete/:id')
+    @Delete(':id')
     async deleteComment(@Req() req: any, @Param('id') id: string) {
         return this.commentService.deleteComment(req.user, id)
     }

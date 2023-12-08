@@ -9,7 +9,7 @@ import { GroupService } from './group.service';
 export class GroupController {
     constructor(private readonly groupService: GroupService) { }
 
-    @Get('all')
+    @Get()
     @ApiOkResponse({ description: 'Groups retrieved.' })
     getAllGroups(@Query() { page, limit }: PaginationGroupDto) {
         return this.groupService.getAllGroups(page, limit);
@@ -22,7 +22,7 @@ export class GroupController {
         return this.groupService.getGroupById(id);
     }
 
-    @Post('create')
+    @Post()
     @ApiBearerAuth()
     @ApiCreatedResponse({ description: 'Group created.' })
     @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
@@ -47,7 +47,7 @@ export class GroupController {
     @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
     @ApiBadRequestResponse({ description: 'Failed to delete group.' })
     @ApiOkResponse({ description: 'Group deleted.' })
-    @Delete('delete/:id')
+    @Delete(':id')
     async deleteGroup(@Req() req: any, @Param('id') id: string) {
         return this.groupService.deleteGroup(req.user, id)
     }
@@ -57,7 +57,7 @@ export class GroupController {
     @ApiOkResponse({ description: 'Group updated.' })
     @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
     @ApiBadRequestResponse({ description: 'Failed to update group.' })
-    @Patch('update/:id')
+    @Patch(':id')
     async updateGroup(@Req() req: any, @Param('id') id: string, @Body() group: UpdateGroupDto) {
         return this.groupService.updateGroup(req.user, id, group)
     }

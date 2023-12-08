@@ -21,7 +21,7 @@ export class UserController {
     @ApiOkResponse({ description: 'User updated.' })
     @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
     @ApiBadRequestResponse({ description: 'Failed to update user.' })
-    @Patch('update')
+    @Patch()
     async updateUser(@Req() req: any, @Body() userDto: UpdateUserDto) {
         return this.userService.updateUser(req.user, userDto )
     }

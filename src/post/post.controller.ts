@@ -9,7 +9,7 @@ import { PostService } from './post.service';
 export class PostController {
     constructor(private readonly postService: PostService) { }
 
-    @Get('all')
+    @Get()
     @ApiOkResponse({ description: 'Posts retrieved.' })
     getAllPosts(@Query() { page, limit }: PaginationPostDto) {
         return this.postService.getAllPosts(page, limit);
@@ -34,7 +34,7 @@ export class PostController {
         return this.postService.getPostById(req.user, id);
     }
 
-    @Post('create')
+    @Post()
     @ApiBearerAuth()
     @ApiCreatedResponse({ description: 'Post created.' })
     @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
@@ -49,7 +49,7 @@ export class PostController {
     @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
     @ApiBadRequestResponse({ description: 'Failed to delete post.' })
     @ApiOkResponse({ description: 'Post deleted.' })
-    @Delete('delete/:id')
+    @Delete(':id')
     async deletePost(@Req() req: any, @Param('id') id: string) {
         return this.postService.deletePost(req.user, id)
     }
@@ -59,7 +59,7 @@ export class PostController {
     @ApiOkResponse({ description: 'Post updated.' })
     @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
     @ApiBadRequestResponse({ description: 'Failed to update post.' })
-    @Patch('update/:id')
+    @Patch(':id')
     async updatePost(@Req() req: any, @Param('id') id: string, @Body() post: UpdatePostDto) {
         return this.postService.updatePost(req.user, id, post)
     }

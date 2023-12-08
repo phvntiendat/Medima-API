@@ -9,7 +9,7 @@ import { LikeService } from './like.service';
 export class LikeController {
     constructor(private readonly likeService: LikeService) { }
 
-    @Post('post')
+    @Post()
     @ApiBearerAuth()
     @ApiOkResponse({ description: 'Like created.' })
     @ApiUnauthorizedResponse({ description: 'Unauthorized.' })

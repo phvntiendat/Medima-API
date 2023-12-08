@@ -13,7 +13,7 @@ export class ChatController {
     @ApiOkResponse({ description: 'Chat/Room created.' })
     @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
     @ApiBadRequestResponse({ description: 'Failed to create chat/room.' })
-    @Post('create')
+    @Post()
     @UseGuards(AuthGuard('jwt'))
     async createChat(@Req() req: any, @Body() chat: CreateChatDto) {
         return this.chatService.createChat(req.user, chat);
