@@ -21,26 +21,26 @@ export class MessageService {
         if (!chatExist) throw new HttpException('Invalid chat', HttpStatus.BAD_REQUEST);
 
         message.sender = user._id
-        const createdMessage = await this.messageRepository.create(message)
+        const created_message = await this.messageRepository.create(message)
         await this.chatRepository.findByIdAndUpdate(message.chat, {
             latest_message: message.content,
             seen: false,
             sender: user.id
         })
 
-        this.eventGateway.sendNewMessage(createdMessage)
-        return createdMessage
+        this.eventGateway.sendNewMessage(created_message)
+        return created_message
     }
 
     async getAllMessageByChatId(user: User, dto: MessageByChatDto, page: number = 1, limit: number = 10) {
         // participants only
 
-        const chatCheck = await this.chatRepository.findById(dto.chat)
-        const isParticipant = chatCheck.participants.some(participant => participant._id.toString() === user._id.toString());
-        if (!isParticipant) throw new HttpException('No Permission', HttpStatus.UNAUTHORIZED);
+        const chat_check = await this.chatRepository.findById(dto.chat)
+        const is_participant = chat_check.participants.some(participant => participant._id.toString() === user._id.toString());
+        if (!is_participant) throw new HttpException('No Permission', HttpStatus.UNAUTHORIZED);
 
         const count = await this.messageRepository.countDocuments({chat: dto.chat})
-        const countPage = Math.ceil(count / limit)
+        const count_page = Math.ceil(count / limit)
         const messages = await this.messageRepository.getByCondition(
             {
                 chat: dto.chat
@@ -58,7 +58,7 @@ export class MessageService {
             }
         )
         return {
-            count, countPage, messages
+            count, count_page, messages
         }
     }
 }

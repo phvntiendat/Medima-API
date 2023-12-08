@@ -29,7 +29,6 @@ export interface User extends Document {
     date_of_birth: Date;
     gender: boolean;
     phone: string;
-
     role: string;
     refreshToken: string;
 }

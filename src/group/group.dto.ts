@@ -18,7 +18,8 @@ export class CreateGroupDto {
     @IsNotEmpty()
     @IsUrl()
     cover: string;
-
+    @ApiProperty({ example: 'Whats your passion?' })
+    question: string;
     creator: any;
 }
 
@@ -35,6 +36,10 @@ export class UpdateGroupDto {
     @ApiProperty({ example: 'https://example.com/image.jpg' })
     @IsUrl()
     cover: string;
+
+    @ApiProperty({ example: 'Whats your passion?' })
+    question: string;
+
 }
 
 

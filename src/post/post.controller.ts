@@ -10,14 +10,22 @@ export class PostController {
     constructor(private readonly postService: PostService) { }
 
     @Get('all')
-    @HttpCode(200)
     @ApiOkResponse({ description: 'Posts retrieved.' })
     getAllPosts(@Query() { page, limit }: PaginationPostDto) {
         return this.postService.getAllPosts(page, limit);
     }
 
+    @Get('by-group/:id')
+    @ApiBearerAuth()
+    @UseGuards(AuthGuard("jwt"))
+    @ApiOkResponse({ description: 'Posts retrieved.' })
+    @ApiNotFoundResponse({ description: 'No group with provided id.' })
+    getAllPostsByGroupId(@Req() req: any, @Param('id') id: string, @Query() { page, limit }: PaginationPostDto) {
+        return this.postService.getAllPostsByGroupId(req.user, id, page, limit);
+    }
+
+
     @Get(':id')
-    @HttpCode(200)
     @ApiBearerAuth()
     @UseGuards(AuthGuard("jwt"))
     @ApiOkResponse({ description: 'Post retrieved.' })
@@ -28,7 +36,6 @@ export class PostController {
 
     @Post('create')
     @ApiBearerAuth()
-    @HttpCode(201)
     @ApiCreatedResponse({ description: 'Post created.' })
     @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
     @ApiBadRequestResponse({ description: 'Failed to create post.' })
@@ -57,7 +64,6 @@ export class PostController {
         return this.postService.updatePost(req.user, id, post)
     }
 
-    @HttpCode(200)
     @ApiOkResponse({ description: 'Post retrieved.' })
     @ApiNotFoundResponse({ description: 'No user with provided id.' })
     @Get('by-user/:id')

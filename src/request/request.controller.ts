@@ -1,7 +1,7 @@
-import { Body, Controller, Delete, HttpCode, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBadRequestResponse, ApiBearerAuth, ApiCreatedResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
-import { CreateRequestDto } from './request.dto';
+import { ApiBadRequestResponse, ApiBearerAuth, ApiCreatedResponse, ApiNotFoundResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { CreateRequestDto, PaginationRequestDto } from './request.dto';
 import { RequestService } from './request.service';
 
 @ApiTags('request')
@@ -38,5 +38,14 @@ export class RequestController {
     @Patch('confirm/:id')
     async confirmRequest(@Req() req: any, @Param('id') id: string) {
         return this.requestService.confirmRequest(req.user, id)
+    }
+
+    @ApiOkResponse({ description: 'Request retrieved.' })
+    @ApiNotFoundResponse({ description: 'No group with provided id.' })
+    @ApiBearerAuth()
+    @UseGuards(AuthGuard("jwt"))
+    @Get('by-group/:id')
+    async getAllRequestsByGroup(@Req() req: any, @Param('id') id: string,  @Query() {page, limit}: PaginationRequestDto) {
+        return this.requestService.getAllRequestsByGroup(req.user, id, page, limit);
     }
 }

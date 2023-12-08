@@ -1,10 +1,10 @@
+import { MailerService } from '@nestjs-modules/mailer';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { CreateUserDto, LoginUserDto, UpdateUserDto } from './dto/user.dto';
-import { UserRepository } from './user.repository';
-import { User } from './user.model';
 import { UpdatePasswordDto } from './dto/password.dto';
-import { MailerService } from '@nestjs-modules/mailer';
+import { CreateUserDto, LoginUserDto, UpdateUserDto } from './dto/user.dto';
+import { User } from './user.model';
+import { UserRepository } from './user.repository';
 
 @Injectable()
 export class UserService {
@@ -27,23 +27,13 @@ export class UserService {
         if (!userDto.avatar) userDto.avatar = "" // leaving avatar as blank string
         userDto.role = 'user'
         userDto.password = await bcrypt.hash(userDto.password, 10); // hasing password
-
         return await this.userRepository.create(userDto)
     }
 
     async login({ email, password }: LoginUserDto) {
-        const user = await this.userRepository.findByCondition({
-            email: email,
-        })
-
-        if (!user) {
-            throw new HttpException('User not found', HttpStatus.UNAUTHORIZED);
-        }
-
-        if (!bcrypt.compareSync(password, user.password)) {
-            throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
-        }
-
+        const user = await this.userRepository.findByCondition({email: email})
+        if (!user) { throw new HttpException('Email not found', HttpStatus.UNAUTHORIZED);}
+        if (!bcrypt.compareSync(password, user.password)) {throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);}
         return user;
     }
 
@@ -62,16 +52,12 @@ export class UserService {
     }
 
     async findByEmail(email) {
-        return await this.userRepository.findByCondition({
-            email: email,
-        });
+        return await this.userRepository.findByCondition({email: email});
     }
 
     async getUserByRefresh(refresh_token, email) {
         const user = await this.findByEmail(email);
-        if (!user) {
-            throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED);
-        }
+        if (!user) { throw new HttpException('Invalid token', HttpStatus.UNAUTHORIZED)}
         const is_equal = await bcrypt.compare(
             this.reverse(refresh_token),
             user.refreshToken,
@@ -80,7 +66,6 @@ export class UserService {
         if (!is_equal) {
             throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
         }
-
         return user;
     }
 
@@ -94,7 +79,7 @@ export class UserService {
         }
         if(!keyword) query = null
         const count = await this.userRepository.countDocuments(query)
-        const countPage = Math.ceil(count / limit)
+        const count_page = Math.ceil(count / limit)
         const users = await this.userRepository.getByCondition(
             query,
             ['first_name', 'last_name', 'email', 'avatar'],
@@ -106,7 +91,7 @@ export class UserService {
                 limit: limit
             },
         )
-        return { count, countPage, users }
+        return { count, count_page, users }
     }
 
     async updateUser(user: User, userDto: UpdateUserDto) {
@@ -129,41 +114,42 @@ export class UserService {
     }
 
     async forgotPassword(email: string) {
-        const userCheck = await this.userRepository.findByCondition({ email: email })
-        if (!userCheck) throw new HttpException('No such email exists', HttpStatus.BAD_REQUEST);
+        const user = await this.userRepository.findByCondition({ email: email })
+        if (!user) throw new HttpException('No such email exists', HttpStatus.BAD_REQUEST);
 
-        const newPassword = this.generateRandomPassword(10);
-        const newPasswordHashed = await bcrypt.hash(newPassword, 10);
-        await this.userRepository.findByIdAndUpdate(userCheck.id, { password: newPasswordHashed })
+        const new_password = this.generateRandomPassword(10);
+        const new_password_hash = await bcrypt.hash(new_password, 10);
+        await this.userRepository.findByIdAndUpdate(user.id, { password: new_password_hash })
 
+        // send new generated password through user's email
         await this.mailerService.sendMail({
             to: email,
             subject: 'Your new password',
             template: `./forgotpassword`,
             context: {
-                password: newPassword
+                password: new_password
             }
         })
 
-        return "check your email for new password"
+        return "Check your email for new password"
 
     }
 
     generateRandomPassword(length: number): string {
         const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         const specialCharacters = "!@#$%^&*()_-+=<>?/[]{}|";
-        // Ensure at least one special character
+        // ensure at least one special character
         const randomSpecialChar = specialCharacters.charAt(Math.floor(Math.random() * specialCharacters.length));
-        // Ensure at least one capital letter
+        // ensure at least one capital letter
         const randomCapitalLetter = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".charAt(Math.floor(Math.random() * 26));
-        // Generate the remaining part of the password
+        // generate the remaining part of the password
         const remainingLength = length - 2; // 1 for special char, 1 for capital letter
         let password = "";
         for (let i = 0; i < remainingLength; i++) {
           const randomIndex = Math.floor(Math.random() * charset.length);
           password += charset.charAt(randomIndex);
         }
-        // Insert the special character and capital letter at random positions
+        // insert the special character and capital letter at random positions
         const randomPosition1 = Math.floor(Math.random() * (length - 1)); // position for special char
         const randomPosition2 = Math.floor(Math.random() * length); // position for capital letter
       
@@ -175,6 +161,13 @@ export class UserService {
           password.slice(randomPosition2);
       
         return password;
-      }
+    }
       
+    async getUserById(id: string) {
+        return await this.userRepository.findById(id, ['-password', '-refreshToken', '-date_of_birth']);
+    }
+
+    async getProfile(user: User) {
+        return await this.userRepository.findById(user.id);
+    }
 }

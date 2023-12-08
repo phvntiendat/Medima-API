@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Param, Patch, Post, Query, Req, UseGuards, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query, Req, UseGuards, ValidationPipe } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateCommentDto, CreateReplyDto, PaginationCommentDto, UpdateCommentDto } from './comment.dto';
 import { CommentService } from './comment.service';
@@ -10,7 +10,6 @@ export class CommentController {
     constructor(private readonly commentService: CommentService) { }
 
     @ApiBearerAuth()
-    @HttpCode(201)
     @ApiOkResponse({ description: 'Comment created.' })
     @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
     @ApiBadRequestResponse({ description: 'Failed to create comment.' })
@@ -22,7 +21,6 @@ export class CommentController {
 
     
     @ApiBearerAuth()
-    @HttpCode(201)
     @ApiOkResponse({ description: 'Reply created.' })
     @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
     @ApiBadRequestResponse({ description: 'Failed to reply.' })
@@ -32,7 +30,6 @@ export class CommentController {
         return this.commentService.createReply(req.user, replyDto);
     }
 
-    @HttpCode(200)
     @ApiBearerAuth()
     @UseGuards(AuthGuard("jwt"))
     @ApiOkResponse({ description: 'Comments retrieved.' })
@@ -42,7 +39,6 @@ export class CommentController {
         return this.commentService.getCommentByPostId( req.user, id, page, limit)
     }
 
-    @HttpCode(200)
     @ApiOkResponse({ description: 'Replies retrieved.' })
     @ApiNotFoundResponse({ description: 'No parent comment with provided id.' })
     @Get('reply/:id') 
@@ -60,5 +56,15 @@ export class CommentController {
     @Patch('update/:id')
     async updateComment(@Req() req: any, @Param('id') id: string, @Body() comment: UpdateCommentDto) {
         return this.commentService.updateComment(req.user, id, comment)
+    }
+
+    @ApiBearerAuth()
+    @UseGuards(AuthGuard("jwt"))
+    @ApiOkResponse({ description: 'Comment deleted.' })
+    @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
+    @ApiBadRequestResponse({ description: 'Failed to delete comment.' })
+    @Delete('delete/:id')
+    async deleteComment(@Req() req: any, @Param('id') id: string) {
+        return this.commentService.deleteComment(req.user, id)
     }
 }

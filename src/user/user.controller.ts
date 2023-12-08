@@ -1,6 +1,6 @@
-import { Body, Controller, Get, HttpCode, Patch, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Patch, Query, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBadRequestResponse, ApiBearerAuth, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { UpdatePasswordDto } from './dto/password.dto';
 import { PaginationUserDto, UpdateUserDto } from './dto/user.dto';
 import { UserService } from './user.service';
@@ -9,10 +9,10 @@ import { UserService } from './user.service';
 @Controller('user')
 export class UserController {
     constructor(private readonly userService: UserService) { }
-    @HttpCode(200)
+
     @ApiOkResponse({ description: 'Users retrieved.' })
     @Get('search')
-    async searchMentors(@Query('keyword') keyword: string, @Query() { page, limit }: PaginationUserDto) {
+    async searchUser(@Query('keyword') keyword: string, @Query() { page, limit }: PaginationUserDto) {
         return await this.userService.searchUser(keyword, page, limit);
     }
 
@@ -34,5 +34,21 @@ export class UserController {
     @Patch('change-password')
     async changePassword(@Req() req: any, @Body() passwordDto: UpdatePasswordDto) {
         return this.userService.changePassword(req.user, passwordDto);
+    }
+
+    @ApiOkResponse({ description: 'Profile retrieved.' })
+    @ApiBearerAuth()
+    @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
+    @UseGuards(AuthGuard('jwt'))
+    @Get('profile')
+    async getProfile(@Req() req: any) {
+        return await this.userService.getProfile(req.user)
+    }
+
+    @ApiOkResponse({ description: 'User retrieved.' })
+    @ApiNotFoundResponse({ description: 'No user with this id.' })
+    @Get(':id')
+    async getUserById(@Param('id') id: string) {
+        return await this.userService.getUserById(id)
     }
 }

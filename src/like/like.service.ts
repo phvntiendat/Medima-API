@@ -1,10 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { LikeRepository } from './like.repository';
 import { User } from 'src/user/user.model';
 import { CreateCommentLikeDto, CreateLikeDto } from './like.dto';
 import { PostService } from 'src/post/post.service';
 import { CommentService } from 'src/comment/comment.service';
-import { CommentLikeRepository } from './commentlike.repository';
+import { CommentLikeRepository } from './repositories/commentlike.repository';
+import { LikeRepository } from './repositories/like.repository';
 
 @Injectable()
 export class LikeService {
@@ -63,7 +63,7 @@ export class LikeService {
 
     async getLikesByPostId(id: string, page: number, limit: number = 10) {
         const count = await this.likeRepository.countDocuments({post: id})
-        const countPage = Math.ceil(count / limit)
+        const count_page = Math.ceil(count / limit)
         const likes = await this.likeRepository.getByCondition(
             {
                 post: id
@@ -82,13 +82,13 @@ export class LikeService {
             }
         )
         return {
-            count, countPage, likes
+            count, count_page, likes
         }
     }
 
     async getLikesByCommentId(id: string, page: number, limit: number = 10) {
         const count = await this.commentLikeRepository.countDocuments({comment: id})
-        const countPage = Math.ceil(count / limit)
+        const count_page = Math.ceil(count / limit)
         const likes = await this.commentLikeRepository.getByCondition(
             {
                 comment: id
@@ -107,7 +107,7 @@ export class LikeService {
             }
         )
         return {
-            count, countPage, likes
+            count, count_page, likes
         }
     }
     

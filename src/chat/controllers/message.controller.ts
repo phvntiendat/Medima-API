@@ -1,9 +1,9 @@
-import { Body, Controller, Get, HttpCode, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { ApiBadRequestResponse, ApiBearerAuth, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { MessageByChatDto, PaginationMessageDto } from '../dto/chat.dto';
 import { CreateMessageDto } from '../dto/message.dto';
 import { MessageService } from '../services/message.service.';
-import { ApiBearerAuth, ApiOkResponse, ApiUnauthorizedResponse, ApiBadRequestResponse, ApiTags } from '@nestjs/swagger';
-import { MessageByChatDto, PaginationMessageDto } from '../dto/chat.dto';
 
 @ApiTags('message')
 @Controller('message')
@@ -11,7 +11,6 @@ export class MessageController {
     constructor(private readonly messageService: MessageService) { }
 
     @ApiBearerAuth()
-    @HttpCode(201)
     @ApiOkResponse({ description: 'Message sent.' })
     @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
     @ApiBadRequestResponse({ description: 'Failed to send message.' })
@@ -23,7 +22,6 @@ export class MessageController {
 
     @Get()
     @UseGuards(AuthGuard('jwt'))
-    @HttpCode(200)
     @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
     @ApiBadRequestResponse({ description: 'Failed to retrieve messages.' })
     @ApiBearerAuth()

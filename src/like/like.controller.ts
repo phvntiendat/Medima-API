@@ -1,9 +1,8 @@
 import { Body, Controller, Get, HttpCode, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
-import { ApiBadRequestResponse, ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
-import { LikeService } from './like.service';
-import { CreateCommentLikeDto, CreateLikeDto, PaginationLikeDto } from './like.dto';
 import { AuthGuard } from '@nestjs/passport';
-import { CreateCommentDto } from 'src/comment/comment.dto';
+import { ApiBadRequestResponse, ApiBearerAuth, ApiNotFoundResponse, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { CreateCommentLikeDto, CreateLikeDto, PaginationLikeDto } from './like.dto';
+import { LikeService } from './like.service';
 
 @ApiTags('like')
 @Controller('like')
@@ -12,7 +11,6 @@ export class LikeController {
 
     @Post('post')
     @ApiBearerAuth()
-    @HttpCode(201)
     @ApiOkResponse({ description: 'Like created.' })
     @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
     @ApiBadRequestResponse({ description: 'Failed to create like.' })
@@ -23,7 +21,6 @@ export class LikeController {
 
     @Post('comment')
     @ApiBearerAuth()
-    @HttpCode(201)
     @ApiOkResponse({ description: 'Like created.' })
     @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
     @ApiBadRequestResponse({ description: 'Failed to create like.' })
@@ -40,7 +37,6 @@ export class LikeController {
         return this.likeService.getLikesByPostId(id, page, limit);
     }
 
-    @HttpCode(200)
     @ApiOkResponse({ description: 'Likes retrieved.' })
     @ApiNotFoundResponse({ description: 'No comment with provided id.' })
     @Get('by-comment/:id')

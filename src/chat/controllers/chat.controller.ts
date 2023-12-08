@@ -1,8 +1,8 @@
-import { Body, Controller, Get, HttpCode, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { CreateChatDto, PaginationMessageDto } from '../dto/chat.dto';
-import { ChatService } from '../services/chat.service';
 import { ApiBadRequestResponse, ApiBearerAuth, ApiOkResponse, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import { CreateChatDto } from '../dto/chat.dto';
+import { ChatService } from '../services/chat.service';
 
 @ApiTags('chat')
 @Controller('chat')
@@ -10,7 +10,6 @@ export class ChatController {
     constructor(private readonly chatService: ChatService) { }
 
     @ApiBearerAuth()
-    @HttpCode(201)
     @ApiOkResponse({ description: 'Chat/Room created.' })
     @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
     @ApiBadRequestResponse({ description: 'Failed to create chat/room.' })
@@ -21,7 +20,6 @@ export class ChatController {
     }
 
     @Get()
-    @HttpCode(200)
     @ApiBearerAuth()
     @ApiUnauthorizedResponse({ description: 'Unauthorized.' })
     @ApiBadRequestResponse({ description: 'Failed to create chat/room.' })

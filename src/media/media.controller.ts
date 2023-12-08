@@ -18,7 +18,6 @@ export class MediaController {
     }
 
     // upload single file
-    @HttpCode(200)
     @ApiOkResponse({ description: 'File uploaded.' })
     @Post('upload')
     @UseInterceptors(FileInterceptor('file'))
@@ -32,7 +31,7 @@ export class MediaController {
         return await this.mediaService.updateACL(media_id);
     }
 
-    // // delet file
+    // // delete file
     // @Delete('delete')
     // async delete(@Query('media_id') media_id: string) {
     //   await this.mediaService.deleteFileS3(media_id);

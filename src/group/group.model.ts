@@ -8,6 +8,7 @@ const GroupSchema = new Schema(
         public: Boolean,
         creator: String,
         description: String,
+        question: String,
         members: [{
             type: Schema.Types.ObjectId,
             ref: 'User'
@@ -29,6 +30,7 @@ export interface Group extends Document {
     cover: string,
     public: boolean,
     creator: string,
+    question: string,
     description: string,
     members: [User]
     admins: [User]
